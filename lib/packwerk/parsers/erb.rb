@@ -33,6 +33,10 @@ module Packwerk
         raise Parsers::ParseError, result
       end
 
+      def self.path_regex
+        /\.erb\Z/
+      end
+
       private
 
       def to_ruby_ast(erb_ast, file_path)

@@ -12,6 +12,10 @@ module Packwerk
       sig { abstract.params(io: File, file_path: String).returns(T.untyped) }
       def call(io:, file_path:)
       end
+
+      sig { abstract.returns(Regexp) }
+      def self.path_regex
+      end
     end
   end
 end

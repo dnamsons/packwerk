@@ -17,6 +17,24 @@ module Packwerk
         assert_instance_of(Parsers::Ruby, factory.for_path("in/repo/gem/foo.gemspec"))
         assert_instance_of(Parsers::Ruby, factory.for_path("Gemfile"))
         assert_instance_of(Parsers::Ruby, factory.for_path("some/path/Rakefile"))
+
+        fake_class = Class.new do
+          T.unsafe(self).include(ParserInterface)
+
+          def self.path_regex
+            /\.rb\Z/
+          end
+        end
+
+        with_custom_parsers([fake_class, Parsers::Ruby]) do
+          assert_instance_of(fake_class, factory.for_path("foo.rb"))
+          assert_instance_of(Parsers::Ruby, factory.for_path("relative/path/to/foo.ru"))
+          assert_instance_of(Parsers::Ruby, factory.for_path("foo.rake"))
+          assert_instance_of(Parsers::Ruby, factory.for_path("foo.builder"))
+          assert_instance_of(Parsers::Ruby, factory.for_path("in/repo/gem/foo.gemspec"))
+          assert_instance_of(Parsers::Ruby, factory.for_path("Gemfile"))
+          assert_instance_of(Parsers::Ruby, factory.for_path("some/path/Rakefile"))
+        end
       end
 
       test "#for_path gives ERB parser for common ERB paths" do
@@ -26,9 +44,13 @@ module Packwerk
 
         fake_class = Class.new do
           T.unsafe(self).include(ParserInterface)
+
+          def self.path_regex
+            /\.erb\Z/
+          end
         end
 
-        with_erb_parser_class(fake_class) do
+        with_custom_parsers([fake_class]) do
           assert_instance_of(fake_class, factory.for_path("foo.html.erb"))
         end
       end
@@ -41,11 +63,11 @@ module Packwerk
 
       private
 
-      def with_erb_parser_class(klass)
-        factory.erb_parser_class = klass
+      def with_custom_parsers(parser_classes)
+        factory.parsers = parser_classes
         yield
       ensure
-        factory.erb_parser_class = nil
+        factory.parsers = nil
       end
 
       def factory

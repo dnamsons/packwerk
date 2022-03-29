@@ -39,6 +39,15 @@ module Packwerk
         result = ParseResult.new(file: file_path, message: "Syntax error: #{e}")
         raise Parsers::ParseError, result
       end
+
+      def self.path_regex
+        %r{
+          # Although not important for regex, these are ordered from most likely to match to least likely.
+          \.(rb|rake|builder|gemspec|ru)\Z
+          |
+          (Gemfile|Rakefile)\Z
+        }x
+      end
     end
   end
 end
