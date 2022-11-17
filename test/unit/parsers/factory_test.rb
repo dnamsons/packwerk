@@ -19,7 +19,7 @@ module Packwerk
         assert_instance_of(Parsers::Ruby, factory.for_path("some/path/Rakefile"))
 
         fake_class = Class.new do
-          T.unsafe(self).include(ParserInterface)
+          T.unsafe(self).include(Packwerk::Parser)
 
           def self.path_regex
             /\.rb\Z/
@@ -43,7 +43,7 @@ module Packwerk
         assert_instance_of(Parsers::Erb, factory.for_path("/sub/directory/foo.erb"))
 
         fake_class = Class.new do
-          T.unsafe(self).include(ParserInterface)
+          T.unsafe(self).include(Packwerk::Parser)
 
           def self.path_regex
             /\.erb\Z/

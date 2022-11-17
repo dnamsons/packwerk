@@ -9,7 +9,13 @@ require "parser/source/buffer"
 module Packwerk
   module Parsers
     class Erb
-      include ParserInterface
+      include Packwerk::Parser
+
+      class << self
+        def path_regex
+          /\.erb\Z/
+        end
+      end
 
       def initialize(parser_class: BetterHtml::Parser, ruby_parser: Ruby.new)
         @parser_class = parser_class
@@ -17,7 +23,7 @@ module Packwerk
       end
 
       def call(io:, file_path: "<unknown>")
-        buffer = Parser::Source::Buffer.new(file_path)
+        buffer = ::Parser::Source::Buffer.new(file_path)
         buffer.source = io.read
         parse_buffer(buffer, file_path: file_path)
       end
@@ -28,13 +34,9 @@ module Packwerk
       rescue EncodingError => e
         result = ParseResult.new(file: file_path, message: e.message)
         raise Parsers::ParseError, result
-      rescue Parser::SyntaxError => e
+      rescue ::Parser::SyntaxError => e
         result = ParseResult.new(file: file_path, message: "Syntax error: #{e}")
         raise Parsers::ParseError, result
-      end
-
-      def self.path_regex
-        /\.erb\Z/
       end
 
       private

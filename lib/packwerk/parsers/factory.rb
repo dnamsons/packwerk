@@ -11,7 +11,7 @@ module Packwerk
 
       DEFAULT_PARSERS = [Ruby, Erb].freeze
 
-      sig { params(path: String).returns(T.nilable(ParserInterface)) }
+      sig { params(path: String).returns(T.nilable(Packwerk::Parser)) }
       def for_path(path)
         parser_class = parsers.find { |parser| parser.path_regex.match?(path) }
 

@@ -7,16 +7,26 @@ require "parser/current"
 module Packwerk
   module Parsers
     class Ruby
-      include ParserInterface
+      include Packwerk::Parser
 
-      class RaiseExceptionsParser < Parser::CurrentRuby
+      class << self
+        def path_regex
+          %r{
+            # Although not important for regex, these are ordered from most likely to match to least likely.
+            \.(rb|rake|builder|gemspec|ru)\Z
+            |
+            (Gemfile|Rakefile)\Z
+          }x
+        end
+      end
+      class RaiseExceptionsParser < ::Parser::CurrentRuby
         def initialize(builder)
           super(builder)
           super.diagnostics.all_errors_are_fatal = true
         end
       end
 
-      class TolerateInvalidUtf8Builder < Parser::Builders::Default
+      class TolerateInvalidUtf8Builder < ::Parser::Builders::Default
         def string_value(token)
           value(token)
         end
@@ -28,25 +38,16 @@ module Packwerk
       end
 
       def call(io:, file_path: "<unknown>")
-        buffer = Parser::Source::Buffer.new(file_path)
+        buffer = ::Parser::Source::Buffer.new(file_path)
         buffer.source = io.read
         parser = @parser_class.new(@builder)
         parser.parse(buffer)
       rescue EncodingError => e
         result = ParseResult.new(file: file_path, message: e.message)
         raise Parsers::ParseError, result
-      rescue Parser::SyntaxError => e
+      rescue ::Parser::SyntaxError => e
         result = ParseResult.new(file: file_path, message: "Syntax error: #{e}")
         raise Parsers::ParseError, result
-      end
-
-      def self.path_regex
-        %r{
-          # Although not important for regex, these are ordered from most likely to match to least likely.
-          \.(rb|rake|builder|gemspec|ru)\Z
-          |
-          (Gemfile|Rakefile)\Z
-        }x
       end
     end
   end
