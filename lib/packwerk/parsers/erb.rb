@@ -11,12 +11,6 @@ module Packwerk
     class Erb
       include Packwerk::Parser
 
-      class << self
-        def path_regex
-          /\.erb\Z/
-        end
-      end
-
       def initialize(parser_class: BetterHtml::Parser, ruby_parser: Ruby.new)
         @parser_class = parser_class
         @ruby_parser = ruby_parser
@@ -26,6 +20,10 @@ module Packwerk
         buffer = ::Parser::Source::Buffer.new(file_path)
         buffer.source = io.read
         parse_buffer(buffer, file_path: file_path)
+      end
+
+      def path_regex
+        /\.erb\Z/
       end
 
       def parse_buffer(buffer, file_path:)

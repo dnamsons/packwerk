@@ -9,16 +9,6 @@ module Packwerk
     class Ruby
       include Packwerk::Parser
 
-      class << self
-        def path_regex
-          %r{
-            # Although not important for regex, these are ordered from most likely to match to least likely.
-            \.(rb|rake|builder|gemspec|ru)\Z
-            |
-            (Gemfile|Rakefile)\Z
-          }x
-        end
-      end
       class RaiseExceptionsParser < ::Parser::CurrentRuby
         def initialize(builder)
           super(builder)
@@ -48,6 +38,15 @@ module Packwerk
       rescue ::Parser::SyntaxError => e
         result = ParseResult.new(file: file_path, message: "Syntax error: #{e}")
         raise Parsers::ParseError, result
+      end
+
+      def path_regex
+        %r{
+          # Although not important for regex, these are ordered from most likely to match to least likely.
+          \.(rb|rake|builder|gemspec|ru)\Z
+          |
+          (Gemfile|Rakefile)\Z
+        }x
       end
     end
   end

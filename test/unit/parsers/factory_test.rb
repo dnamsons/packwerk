@@ -17,42 +17,26 @@ module Packwerk
         assert_instance_of(Parsers::Ruby, factory.for_path("in/repo/gem/foo.gemspec"))
         assert_instance_of(Parsers::Ruby, factory.for_path("Gemfile"))
         assert_instance_of(Parsers::Ruby, factory.for_path("some/path/Rakefile"))
-
-        fake_class = Class.new do
-          T.unsafe(self).include(Packwerk::Parser)
-
-          def self.path_regex
-            /\.rb\Z/
-          end
-        end
-
-        with_custom_parsers([fake_class, Parsers::Ruby]) do
-          assert_instance_of(fake_class, factory.for_path("foo.rb"))
-          assert_instance_of(Parsers::Ruby, factory.for_path("relative/path/to/foo.ru"))
-          assert_instance_of(Parsers::Ruby, factory.for_path("foo.rake"))
-          assert_instance_of(Parsers::Ruby, factory.for_path("foo.builder"))
-          assert_instance_of(Parsers::Ruby, factory.for_path("in/repo/gem/foo.gemspec"))
-          assert_instance_of(Parsers::Ruby, factory.for_path("Gemfile"))
-          assert_instance_of(Parsers::Ruby, factory.for_path("some/path/Rakefile"))
-        end
       end
 
       test "#for_path gives ERB parser for common ERB paths" do
         assert_instance_of(Parsers::Erb, factory.for_path("foo.html.erb"))
         assert_instance_of(Parsers::Erb, factory.for_path("foo.md.erb"))
         assert_instance_of(Parsers::Erb, factory.for_path("/sub/directory/foo.erb"))
+      end
 
+      test "#for_path gives custom parser for matching paths" do
         fake_class = Class.new do
           T.unsafe(self).include(Packwerk::Parser)
 
-          def self.path_regex
-            /\.erb\Z/
+          def path_regex
+            /\.slim\Z/
           end
         end
 
-        with_custom_parsers([fake_class]) do
-          assert_instance_of(fake_class, factory.for_path("foo.html.erb"))
-        end
+        assert_instance_of(fake_class, factory.for_path("foo.html.slim"))
+        assert_instance_of(fake_class, factory.for_path("foo.md.slim"))
+        assert_instance_of(fake_class, factory.for_path("/sub/directory/foo.slim"))
       end
 
       test "#for_path gives nil for unknown path" do
